@@ -45,7 +45,15 @@ public:
 	};
 	
 	virtual uint8 ReadByte();
-		
+
+	// TODO: these only work on LE machines for now
+	// Use these only if you need to swap endianess, because they are
+	// not efficient: they read one byte at a time
+	uint16 ReadWordLE();
+	uint16 ReadWordBE();
+	uint32 ReadDWordLE();
+	uint32 ReadDWordBE();
+
 	template<typename T>
 	Stream& operator>>(T& data) {
 		ssize_t read = Read(&data, sizeof(data));

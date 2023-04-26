@@ -71,6 +71,46 @@ Stream::ReadByte()
 }
 
 
+uint16
+Stream::ReadWordBE()
+{
+	uint8 result1 = ReadByte();
+	uint8 result2 = ReadByte();
+
+	return (uint16)((result1 << 8) | (result2));
+}
+
+
+uint16
+Stream::ReadWordLE()
+{
+	uint16 result;
+	if (Read(&result, sizeof(result)) != sizeof(result))
+		throw std::runtime_error("ReadWordLE() read error");
+	return result;
+}
+
+
+uint32
+Stream::ReadDWordBE()
+{
+	uint16 result1 = ReadWordBE();
+	uint16 result2 = ReadWordBE();
+
+	return (uint32)((result1 << 16) | (result2));
+}
+
+
+uint32
+Stream::ReadDWordLE()
+{
+	uint32 result;
+	if (Read(&result, sizeof(result)) != sizeof(result))
+		throw std::runtime_error("ReadDWordLE() read error");
+	return result;
+}
+
+
 /* virtual */
 Stream*
 Stream::Clone() const
