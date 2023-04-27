@@ -22,6 +22,11 @@ public:
 	};
 	virtual ssize_t ReadAt(off_t pos, void *dst, size_t size)
 	{
+		if (pos < 0 || (size_t)pos >= fSize)
+			return -1;
+		size_t readable = fSize - pos;
+		if (size > readable)
+			size = readable;
 		return fParent->ReadAt(fParentOffset + pos, dst, size);
 	};
 	virtual off_t Seek(off_t where, int whence)
