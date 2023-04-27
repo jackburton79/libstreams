@@ -10,26 +10,40 @@ public:
 	SubStreamAdapter(Stream* stream, off_t offset, size_t length)
 		:
 		fParent(stream),
-		fOffset(offset),
+		fParentOffset(offset),
+		fPosition(0),
 		fSize(length)
 	{
-		assert(fOffset >= 0);
-		assert(size_t(fOffset) < fParent->Size());
-		assert(fSize <= fParent->Size() - fOffset);
+		assert(fParentOffset >= 0);
+		assert(size_t(fParentOffset) < fParent->Size());
+		assert(fSize <= fParent->Size() - fParentOffset);
 		// TODO: The parent stream should be aware,
 		// otherwise deleting it could cause leaks or memory corruption
 	};
 	virtual ssize_t ReadAt(off_t pos, void *dst, size_t size)
 	{
-		return fParent->ReadAt(fOffset + pos, dst, size);
+		return fParent->ReadAt(fParentOffset + pos, dst, size);
 	};
 	virtual off_t Seek(off_t where, int whence)
 	{
-		return fParent->Seek(where + fOffset, whence) - fOffset;
+		switch (whence) {
+			case SEEK_SET:
+				fPosition = where;
+				break;
+			case SEEK_CUR:
+				fPosition += where;
+				break;
+			case SEEK_END:
+				fPosition = fSize + where;
+				break;
+			default:
+				break;
+		}
+		return fPosition;
 	};
 	virtual off_t Position() const
 	{
-		return fParent->Position() - fOffset;
+		return fPosition;
 	};
 
 	virtual size_t Size() const
@@ -38,7 +52,8 @@ public:
 	}
 private:
 	Stream* fParent;
-	off_t fOffset;
+	off_t fParentOffset;
+	off_t fPosition;
 	size_t fSize;
 };
 
