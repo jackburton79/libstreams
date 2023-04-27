@@ -78,7 +78,8 @@ public:
 
 	virtual Stream* Clone() const;
 	virtual Stream* Adopt();
-	
+	Stream* SubStream(off_t pos, size_t size);
+
 	void Dump();
 	void DumpToFile(const char *fileName);
 };

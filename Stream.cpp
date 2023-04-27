@@ -1,9 +1,49 @@
 #include "Stream.h"
 
-#include <stdexcept>
+#include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 
+class SubStreamAdapter : public Stream {
+public:
+	SubStreamAdapter(Stream* stream, off_t offset, size_t length)
+		:
+		fParent(stream),
+		fOffset(offset),
+		fSize(length)
+	{
+		assert(fOffset >= 0);
+		assert(size_t(fOffset) < fParent->Size());
+		assert(fSize <= fParent->Size() - fOffset);
+		// TODO: The parent stream should be aware,
+		// otherwise deleting it could cause leaks or memory corruption
+	};
+	virtual ssize_t ReadAt(off_t pos, void *dst, size_t size)
+	{
+		return fParent->ReadAt(fOffset + pos, dst, size);
+	};
+	virtual off_t Seek(off_t where, int whence)
+	{
+		return fParent->Seek(where + fOffset, whence) - fOffset;
+	};
+	virtual off_t Position() const
+	{
+		return fParent->Position() - fOffset;
+	};
+
+	virtual size_t Size() const
+	{
+		return fSize;
+	}
+private:
+	Stream* fParent;
+	off_t fOffset;
+	size_t fSize;
+};
+
+
+// Stream
 Stream::Stream()
 {
 }
@@ -128,6 +168,13 @@ Stream::Adopt()
 	std::cerr << "Stream::Adopt() not implemented!";
 	throw std::runtime_error("Stream::Adopt() not implemented!");
 	return NULL;
+}
+
+
+Stream*
+Stream::SubStream(off_t offset, size_t size)
+{
+	return new SubStreamAdapter(this, offset, size);
 }
 
 
