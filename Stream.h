@@ -45,6 +45,7 @@ public:
 	};
 	
 	virtual uint8 ReadByte();
+	uint8 ReadByteAt(off_t offset);
 
 	// TODO: these only work on LE machines for now
 	// Use these only if you need to swap endianess, because they are
@@ -53,6 +54,11 @@ public:
 	uint16 ReadWordBE();
 	uint32 ReadDWordLE();
 	uint32 ReadDWordBE();
+
+	uint16 ReadWordLEAt(off_t offset);
+	uint16 ReadWordBEAt(off_t offset);
+	uint32 ReadDWordLEAt(off_t offset);
+	uint32 ReadDWordBEAt(off_t offset);
 
 	template<typename T>
 	Stream& operator>>(T& data) {

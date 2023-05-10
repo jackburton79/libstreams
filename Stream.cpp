@@ -171,6 +171,57 @@ Stream::ReadDWordLE()
 }
 
 
+uint8
+Stream::ReadByteAt(off_t offset)
+{
+	uint8 byte;
+	ssize_t read = ReadAt(offset, &byte, sizeof(byte));
+	if (read != sizeof(byte))
+		throw std::runtime_error("Stream::ReadByteAt(): tried to read uint8 but got less !");
+	return byte;
+}
+
+
+uint16
+Stream::ReadWordBEAt(off_t offset)
+{
+	uint8 result1 = ReadByteAt(offset);
+	uint8 result2 = ReadByteAt(offset + 1);
+
+	return (uint16)((result1 << 8) | (result2));
+}
+
+
+uint16
+Stream::ReadWordLEAt(off_t offset)
+{
+	uint16 result;
+	if (ReadAt(offset, &result, sizeof(result)) != sizeof(result))
+		throw std::runtime_error("ReadWordLEAt() read error");
+	return result;
+}
+
+
+uint32
+Stream::ReadDWordBEAt(off_t offset)
+{
+	uint16 result1 = ReadWordBEAt(offset);
+	uint16 result2 = ReadWordBEAt(offset + sizeof(uint16));
+
+	return (uint32)((result1 << 16) | (result2));
+}
+
+
+uint32
+Stream::ReadDWordLEAt(off_t offset)
+{
+	uint32 result;
+	if (ReadAt(offset, &result, sizeof(result)) != sizeof(result))
+		throw std::runtime_error("ReadDWordLEAt() read error");
+	return result;
+}
+
+
 /* virtual */
 Stream*
 Stream::Clone() const
